@@ -8,6 +8,8 @@ stages:
   - stage: CI
     displayName: "Build CI"
     jobs:
+
+      # ----------------- FRONTEND -----------------
       - job: BuildFrontend
         displayName: "Build Frontend"
         steps:
@@ -18,56 +20,98 @@ stages:
           
           - script: |
               cd tp4/frontend
-              npm install   # en lugar de npm ci si no tenés package-lock.json válido
+              npm install
               npm run build
+              echo "Archivos generados en build:"
+              ls -la build
             displayName: "Instalar dependencias y compilar frontend"
 
+          - task: PublishBuildArtifacts@1
+            inputs:
+              PathtoPublish: '$(System.DefaultWorkingDirectory)/tp4/frontend/build'
+              ArtifactName: 'frontend-build'
+            displayName: 'Publicar artefactos frontend'
+
+      # ----------------- ADMIN API -----------------
       - job: BuildAdminApi
         displayName: "Compilar admin-api"
         steps:
           - task: GoTool@0
             inputs:
               version: '1.24.x'
-            displayName: "Usar Go"
 
           - script: |
               cd tp4/backend/admin-api
               go mod tidy
-              go build ./...
+              mkdir -p dist/bin
+              go build -o dist/bin/admin-api
             displayName: "Compilar admin-api"
 
+          - task: PublishPipelineArtifact@1
+            inputs:
+              targetPath: '$(System.DefaultWorkingDirectory)/tp4/backend/admin-api/dist/bin'
+              artifact: 'admin-api-bin'
+            displayName: "Publicar artefacto admin-api"
+
+      # ----------------- SEARCH API -----------------
       - job: BuildSearchApi
         displayName: "Compilar search-api"
         steps:
           - task: GoTool@0
             inputs:
               version: '1.24.x'
+
           - script: |
               cd tp4/backend/search-api
               go mod tidy
-              go build ./...
+              mkdir -p dist/bin
+              go build -o dist/bin/search-api
             displayName: "Compilar search-api"
 
+          - task: PublishPipelineArtifact@1
+            inputs:
+              targetPath: '$(System.DefaultWorkingDirectory)/tp4/backend/search-api/dist/bin'
+              artifact: 'search-api-bin'
+            displayName: "Publicar artefacto search-api"
+
+      # ----------------- CURSOS API -----------------
       - job: BuildCursosApi
         displayName: "Compilar cursos-api"
         steps:
           - task: GoTool@0
             inputs:
               version: '1.24.x'
+
           - script: |
               cd tp4/backend/cursos-api
               go mod tidy
-              go build ./...
+              mkdir -p dist/bin
+              go build -o dist/bin/cursos-api
             displayName: "Compilar cursos-api"
 
+          - task: PublishPipelineArtifact@1
+            inputs:
+              targetPath: '$(System.DefaultWorkingDirectory)/tp4/backend/cursos-api/dist/bin'
+              artifact: 'cursos-api-bin'
+            displayName: "Publicar artefacto cursos-api"
+
+      # ----------------- USERS API -----------------
       - job: BuildUsersApi
         displayName: "Compilar users-api"
         steps:
           - task: GoTool@0
             inputs:
               version: '1.24.x'
+
           - script: |
               cd tp4/backend/users-api
               go mod tidy
-              go build ./...
+              mkdir -p dist/bin
+              go build -o dist/bin/users-api
             displayName: "Compilar users-api"
+
+          - task: PublishPipelineArtifact@1
+            inputs:
+              targetPath: '$(System.DefaultWorkingDirectory)/tp4/backend/users-api/dist/bin'
+              artifact: 'users-api-bin'
+            displayName: "Publicar artefacto users-api"
