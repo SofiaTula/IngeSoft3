@@ -1,9 +1,73 @@
 trigger:
-- main
+  - main
 
 pool:
   vmImage: ubuntu-latest
 
-steps:
-- script: echo "Hello Azure Pipelines!"
-  displayName: 'Run a one-line script'
+stages:
+  - stage: CI
+    displayName: "Build CI"
+    jobs:
+      - job: BuildFrontend
+        displayName: "Build Frontend"
+        steps:
+          - task: NodeTool@0
+            inputs:
+              versionSpec: '18.x'
+            displayName: "Usar Node.js"
+          
+          - script: |
+              cd tp4/frontend
+              npm install   # en lugar de npm ci si no tenés package-lock.json válido
+              npm run build
+            displayName: "Instalar dependencias y compilar frontend"
+
+      - job: BuildAdminApi
+        displayName: "Compilar admin-api"
+        steps:
+          - task: GoTool@0
+            inputs:
+              version: '1.24.x'
+            displayName: "Usar Go"
+
+          - script: |
+              cd tp4/backend/admin-api
+              go mod tidy
+              go build ./...
+            displayName: "Compilar admin-api"
+
+      - job: BuildSearchApi
+        displayName: "Compilar search-api"
+        steps:
+          - task: GoTool@0
+            inputs:
+              version: '1.24.x'
+          - script: |
+              cd tp4/backend/search-api
+              go mod tidy
+              go build ./...
+            displayName: "Compilar search-api"
+
+      - job: BuildCursosApi
+        displayName: "Compilar cursos-api"
+        steps:
+          - task: GoTool@0
+            inputs:
+              version: '1.24.x'
+          - script: |
+              cd tp4/backend/cursos-api
+              go mod tidy
+              go build ./...
+            displayName: "Compilar cursos-api"
+
+      - job: BuildUsersApi
+        displayName: "Compilar users-api"
+        steps:
+          - task: GoTool@0
+            inputs:
+              version: '1.24.x'
+          - script: |
+              cd tp4/backend/users-api
+              go mod tidy
+              go build ./...
+            displayName: "Compilar users-api"
